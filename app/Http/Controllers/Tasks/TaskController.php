@@ -33,15 +33,15 @@ class TaskController extends Controller
         return view('task.edit', compact('task'));
     }
 
-    public function update(int $id, TaskRequest $request){
+    public function update(int $id, TaskRequest $request): mixed{
         $this->taskService->updateTask($id, $request->all());
-         notyf()->success('Task Updated successfully.');
+        notyf()->success('Task Updated successfully.');
         return to_route('task.index');
     }
 
-    public function destroy(int $id){
+    public function destroy(int $id): mixed{
         $this->taskService->destroyTask($id);
-         notyf()->success('Task deleted successfully.');
+        notyf()->success('Task deleted successfully.');
         return redirect()->back();
     }
 }
