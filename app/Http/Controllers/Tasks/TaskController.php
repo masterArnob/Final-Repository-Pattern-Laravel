@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Tasks;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskRequest;
 use App\Services\TaskService;
-use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
@@ -13,23 +12,23 @@ class TaskController extends Controller
     public function __construct(TaskService $taskService){
         $this->taskService = $taskService;
     }
-    public function index(){
+    public function index(): mixed{
         $tasks = $this->taskService->getAllTask();
         return view('task.index', compact('tasks'));
     }
 
-    public function create(){
+    public function create(): mixed{
         return view('task.create');
     }
 
-    public function store(TaskRequest $request){
+    public function store(TaskRequest $request): mixed{
         //dd($request->alL());
         $this->taskService->storeTask($request->all());
         notyf()->success('Task Saved successfully.');
         return to_route('task.index');
     }
 
-    public function edit($id){
+    public function edit($id): mixed{
         $task = $this->taskService->findTask($id);
         return view('task.edit', compact('task'));
     }
