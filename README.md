@@ -4,8 +4,8 @@
 1. Controller Become Short.
 2. We Can Use Same Repository In Multiple Place.
 ### Without Repository:
-1. **Problem 1: ** If I Need Users In 5 Controller Then I Have To Call User Model 5 Times In Different Place. If I Use Repository Pattern Then I Just Have To Create 1 Repository & Implement It In 5 Controller.
-2. **Problem 2: ** If I Try To Switch Database From Mysql To MongoDb Then I Have To CHange All The Controller But With Repository Pattern Then I Have To Only CHange 1 File. 
+1. **Problem 1:** If I Need Users In 5 Controller Then I Have To Call User Model 5 Times In Different Place. If I Use Repository Pattern Then I Just Have To Create 1 Repository & Implement It In 5 Controller.
+2. **Problem 2:** If I Try To Switch Database From Mysql To MongoDb Then I Have To CHange All The Controller But With Repository Pattern Then I Have To Only CHange 1 File. 
 
 ### Repository Pattern Steps:
 **1. Make Repository Interface: Contains the methods that are going to be used in Interface Repository**
