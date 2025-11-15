@@ -1,3 +1,185 @@
+### Repository Pattern:
+**Saperate Database Logic(Queries. Models) From Business Logic(Controller, Services)**
+### Benifit of Repository Pattern:
+1. Controller Become Short.
+2. We Can Use Same Repository In Multiple Place.
+### Without Repository:
+1. **Problem 1:** If I Need Users In 5 Controller Then I Have To Call User Model 5 Times In Different Place. If I Use Repository Pattern Then I Just Have To Create 1 Repository & Implement It In 5 Controller.
+2. **Problem 2:** If I Try To Switch Database From Mysql To MongoDb Then I Have To CHange All The Controller But With Repository Pattern Then I Have To Only CHange 1 File. 
+
+### Repository Pattern Steps:
+**1. Make Repository Interface: Contains the methods that are going to be used in Interface Repository**
+```php
+<?php
+
+namespace App\Interfaces;
+
+interface TaskRepositoryInterface
+{
+    public function all();
+    public function find(int $id);
+    public function store(array $data);
+    public function update(int $id, array $data);
+    public function destroy(int $id);
+}
+
+```
+**2. Make Repository: Handles the db operations**
+```php
+<?php
+namespace App\Repositories;
+
+use App\Interfaces\TaskRepositoryInterface;
+use App\Models\Task;
+
+class TaskRepository implements TaskRepositoryInterface
+{
+    public function all(): mixed{
+        return Task::orderBy('id', 'DESC')->get();
+    }
+    public function find(int $id): mixed{
+        return Task::find($id);
+    }
+    public function store(array $data): mixed{
+        return Task::create($data);
+    }
+    public function update(int $id, array $data){
+        $task = Task::find($id);
+        if($task){
+            return $task->update($data);
+        }
+    }
+    public function destroy(int $id){
+        $task = Task::find($id);
+        if($task){
+            return $task->delete();
+        }
+    }
+}
+
+```
+**3. Make Service Provider: Bind Repository Interface + Repository**
+```php
+<?php
+
+namespace App\Providers;
+
+use App\Interfaces\TaskRepositoryInterface;
+use App\Repositories\TaskRepository;
+use Illuminate\Support\ServiceProvider;
+
+class TaskServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     */
+    public function register(): void
+    {
+        $this->app->bind(
+            TaskRepositoryInterface::class,
+            TaskRepository::class
+        );
+    }
+
+    /**
+     * Bootstrap services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+}
+
+```
+**4. Make Service: Business Logice Layer**
+```php
+<?php
+namespace App\Services;
+
+use App\Interfaces\TaskRepositoryInterface;
+use Illuminate\Http\Request;
+
+class TaskService
+{
+    protected $taskRepository;
+    public function __construct(TaskRepositoryInterface $taskRepository){
+        $this->taskRepository = $taskRepository;
+    }
+    public function getAllTask(): mixed{
+        return $this->taskRepository->all();
+    }
+    public function getTaskById(int $id): mixed{
+        return $this->taskRepository->find($id);
+    }
+    public function storeTask(array $data): mixed{
+        return $this->taskRepository->store($data);
+    }
+
+    public function findTask(int $id): mixed{
+        return $this->taskRepository->find($id);
+    }
+
+    public function updateTask(int $id, array $data): mixed{
+        return $this->taskRepository->update($id, $data);
+    }
+    public function destroyTask(int $id): mixed{
+        return $this->taskRepository->destroy($id);
+    }
+}
+
+```
+**5. Make Controller: Handles User Request**
+```php
+<?php
+
+namespace App\Http\Controllers\Tasks;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\TaskRequest;
+use App\Services\TaskService;
+
+class TaskController extends Controller
+{
+    protected $taskService;
+    public function __construct(TaskService $taskService){
+        $this->taskService = $taskService;
+    }
+    public function index(): mixed{
+        $tasks = $this->taskService->getAllTask();
+        return view('task.index', compact('tasks'));
+    }
+
+    public function create(): mixed{
+        return view('task.create');
+    }
+
+    public function store(TaskRequest $request): mixed{
+        //dd($request->alL());
+        $this->taskService->storeTask($request->all());
+        notyf()->success('Task Saved successfully.');
+        return to_route('task.index');
+    }
+
+    public function edit($id): mixed{
+        $task = $this->taskService->findTask($id);
+        return view('task.edit', compact('task'));
+    }
+
+    public function update(int $id, TaskRequest $request){
+        $this->taskService->updateTask($id, $request->all());
+         notyf()->success('Task Updated successfully.');
+        return to_route('task.index');
+    }
+
+    public function destroy(int $id){
+        $this->taskService->destroyTask($id);
+         notyf()->success('Task deleted successfully.');
+        return redirect()->back();
+    }
+}
+
+```
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
